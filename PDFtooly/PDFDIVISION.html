@@ -1,0 +1,239 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>DIVISER EN PARTIES</title>
+<meta name="description" content="Conversion d'un fichier .pdf vers autant d'image(s), en.jpg" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+    <style>
+	        #preview-container {
+            margin-top: 0px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+		
+        #preview-container div {
+            margin: 10px;
+        }
+		
+        #preview-container canvas {
+            border: 1px solid black;
+        }
+		
+        .icon-intero {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+
+        .icon-linkintero {
+            text-decoration: none;
+            color: black;
+            font-size: 24px;
+        }
+		
+	/* Changer la couleur du lien lorsque la souris le survole */
+    .icon-linkintero:hover {
+        color: green; /* Couleur au survol */
+    }
+    </style>
+</head>
+<body>
+
+ <div class="icon-intero">
+        <a href="MENU.html" class="icon-linkintero">
+            <span class="icon">?</span>
+        </a>
+    </div>
+
+<div class="container">    
+    <div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir en .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir en .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir en .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser en parties</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever des pages</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner des .pdf</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+	<div style="margin-top: 200px;">
+	<P>Séléctionnez un fichier .pdf afin de le diviser en plusieurs fichier PDF.</P>
+	
+    <input type="file" id="pdf-upload" accept="application/pdf"/>
+    <label for="split-options">Diviser en :</label>
+    <select id="split-options"></select>
+    <button id="split-pdf">Diviser le PDF</button>
+    <div id="preview-container"></div> <!-- Conteneur pour les aperçus -->
+
+    <!-- Charger pdf-lib et pdfjs-dist -->
+    <script src="https://unpkg.com/pdf-lib"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+
+    <script>
+        const pdfUpload = document.getElementById('pdf-upload');
+        const splitButton = document.getElementById('split-pdf');
+        const splitOptions = document.getElementById('split-options');
+        const previewContainer = document.getElementById('preview-container');
+
+        let loadedPdfBytes = null;
+        let numPages = 0;
+        let originalFileName = '';
+
+        // Fonction pour mettre à jour le menu déroulant des options de division
+        function updateSplitOptions(maxParts) {
+            splitOptions.innerHTML = '';
+
+            for (let i = 2; i <= Math.min(maxParts, 10); i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.text = `${i} parties`;
+                splitOptions.appendChild(option);
+            }
+        }
+
+        // Charger le fichier PDF et générer les aperçus
+        pdfUpload.addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            if (file.type !== 'application/pdf') {
+                alert('Veuillez télécharger un fichier PDF');
+                return;
+            }
+
+            originalFileName = file.name.replace(/\.pdf$/, ''); // Retirer l'extension .pdf du nom de fichier
+
+            const fileReader = new FileReader();
+            fileReader.onload = async function(e) {
+                loadedPdfBytes = new Uint8Array(e.target.result);
+
+                const pdfDoc = await PDFLib.PDFDocument.load(loadedPdfBytes);
+                numPages = pdfDoc.getPageCount();
+
+                updateSplitOptions(numPages);
+
+                alert(`Le fichier PDF contient ${numPages} pages. Vous pouvez le diviser jusqu'à ${Math.min(numPages, 10)} parties.`);
+
+                // Ajouter les aperçus après l'alerte
+                const loadingTask = pdfjsLib.getDocument({ data: loadedPdfBytes });
+                const pdf = await loadingTask.promise;
+
+                previewContainer.innerHTML = ''; // Effacer les anciens aperçus
+
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 0.95 }); // ************* Échelle de réduction des aperçus **************
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    await page.render(renderContext).promise;
+
+                    const div = document.createElement('div');
+                    div.classList.add('page-preview');
+                    div.appendChild(canvas);
+
+                    previewContainer.appendChild(div);
+                }
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        });
+
+        // Diviser le PDF
+        splitButton.addEventListener('click', async function() {
+            if (!loadedPdfBytes) {
+                alert("Veuillez d'abord charger un fichier PDF.");
+                return;
+            }
+
+            const numParts = parseInt(splitOptions.value);
+
+            if (numParts > numPages) {
+                alert("Le nombre de parties ne peut pas dépasser le nombre de pages du PDF.");
+                return;
+            }
+
+            const originalPdf = await PDFLib.PDFDocument.load(loadedPdfBytes);
+            const pagesPerPart = Math.floor(numPages / numParts);
+            const remainingPages = numPages % numParts;
+
+            let currentPageIndex = 0;
+
+            for (let part = 0; part < numParts; part++) {
+                const newPdf = await PDFLib.PDFDocument.create();
+                const startPage = currentPageIndex;
+                const endPage = startPage + pagesPerPart + (part < remainingPages ? 1 : 0);
+
+                const pagesToCopy = await newPdf.copyPages(originalPdf, Array.from({ length: endPage - startPage }, (v, k) => k + startPage));
+                pagesToCopy.forEach((page) => newPdf.addPage(page));
+
+                currentPageIndex = endPage;
+
+                const newPdfBytes = await newPdf.save();
+                const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${originalFileName}_part_${part + 1}.pdf`; // Inclure le nom du fichier d'origine
+                link.click();
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+

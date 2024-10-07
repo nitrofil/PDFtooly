@@ -1,0 +1,223 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; utf-8" />
+<title>CONVERTIR EN ZIP</title>
+<meta name="description" content="Conversion de 1 ou plusieus .PDF en fichier .ZIP - Maintenir CTRL" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+	<style>
+        #pdf-preview img {
+            max-width: 570px;
+            margin: 10px;
+			border: 1px solid black;
+        }
+		
+		.icon-intero {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+
+        .icon-linkintero {
+            text-decoration: none;
+            color: black;
+            font-size: 24px;
+        }
+		
+	    .icon-linkintero:hover {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+ <div class="icon-intero">
+        <a href="MENU.html" class="icon-linkintero">
+            <span class="icon">?</span>
+        </a>
+    </div>
+
+<div class="container">    
+    <div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir en .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir en .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir en .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser en parties</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever des pages</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner des .pdf</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+	<div style="margin-top: 200px;">
+	<P>Séléctionnez un ou plusieurs fichier(s) .pdf afin de créer une archive au format ZIP.</P>
+    <input type="file" id="pdf-upload" accept="application/pdf" multiple/>
+    
+    <!-- Ajouter un champ de texte pour le nom du fichier ZIP -->
+        <input type="text" id="zip-name" placeholder="Nom du fichier de sortie"/>
+
+    <button id="generate-zip">Générer ZIP</button>
+    <div id="pdf-preview"></div>
+
+    <!-- Charger les bibliothèques nécessaires -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+        // Configurer le chemin du worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
+        const pdfUpload = document.getElementById('pdf-upload');
+        const pdfPreview = document.getElementById('pdf-preview');
+        const generateZipButton = document.getElementById('generate-zip');
+        const zipNameInput = document.getElementById('zip-name'); // Champ pour le nom du fichier ZIP
+
+        const pdfFiles = []; // Stocker les fichiers PDF chargés
+
+        // Prévisualiser les fichiers PDF et les stocker
+        pdfUpload.addEventListener('change', function(event) {
+            pdfPreview.innerHTML = ''; // Vider la prévisualisation
+            pdfFiles.length = 0; // Réinitialiser les fichiers PDF stockés
+
+            const files = event.target.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                pdfFiles.push(file); // Ajouter le fichier PDF à la liste
+                displayPDFPreview(file); // Afficher un aperçu de chaque PDF
+            }
+        });
+
+        // Afficher un aperçu de la première page du PDF
+        function displayPDFPreview(file) {
+            const fileReader = new FileReader();
+
+            fileReader.onload = function() {
+                const typedArray = new Uint8Array(this.result);
+
+                pdfjsLib.getDocument(typedArray).promise.then(function(pdf) {
+                    pdf.getPage(1).then(function(page) {
+                        const scale = 3.0; // Facteur d'échelle pour agrandir l'aperçu
+                        const viewport = page.getViewport({ scale: scale });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+
+                        page.render(renderContext).promise.then(function() {
+                            // Convertir la page en image
+                            const img = document.createElement('img');
+                            img.src = canvas.toDataURL('image/jpeg');
+                            pdfPreview.appendChild(img);
+                        }).catch(function(error) {
+                            console.error("Erreur lors du rendu de la page:", error);
+                        });
+                    }).catch(function(error) {
+                        console.error("Erreur lors de la récupération de la page:", error);
+                    });
+                }).catch(function(error) {
+                    console.error("Erreur lors du chargement du PDF:", error);
+                });
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        }
+
+        // Générer le ZIP à partir des fichiers PDF chargés
+        generateZipButton.addEventListener('click', function() {
+            if (pdfFiles.length === 0) {
+                alert("Veuillez d'abord télécharger des fichiers PDF.");
+                return;
+            }
+
+            const zipFileName = zipNameInput.value.trim() || "pdf_compress.zip"; // Utiliser le nom du fichier entré, sinon valeur par défaut
+
+            const zip = new JSZip(); // Créer un nouveau fichier ZIP
+
+            const pdfPromises = pdfFiles.map((file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const fileName = file.name;
+                        const fileContent = e.target.result;
+                        zip.file(fileName, fileContent); // Ajouter le fichier PDF au ZIP
+                        resolve();
+                    };
+
+                    reader.onerror = function(e) {
+                        reject(e);
+                    };
+
+                    reader.readAsArrayBuffer(file); // Lire le fichier en tant que ArrayBuffer
+                });
+            });
+
+            // Attendre que tous les fichiers PDF soient lus avant de créer le ZIP
+            Promise.all(pdfPromises).then(() => {
+                zip.generateAsync({ type: "blob" }).then(function(content) {
+                    // Télécharger le fichier ZIP avec le nom choisi
+                    saveAs(content, zipFileName);
+                });
+            }).catch((error) => {
+                console.error("Erreur lors de la création du ZIP:", error);
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+

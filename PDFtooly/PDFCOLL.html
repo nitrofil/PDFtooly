@@ -1,0 +1,210 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>COMBINER DES PDF</title>
+<meta name="description" content="Conversion d'un fichier .pdf vers autant d'image(s), en.jpg" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+    <style>
+        .pdf-preview {
+            margin: 10px;
+            display: inline-block;
+            position: relative;
+            text-align: center;
+        }
+
+        .pdf-preview canvas {
+            border: 1px solid #000;
+            margin-bottom: 5px;
+        }
+
+        .pdf-preview-label {
+            font-weight: bold;
+        }
+
+        .icon-intero {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+
+        .icon-linkintero {
+            text-decoration: none;
+            color: black;
+            font-size: 24px;
+        }
+		
+	/* Changer la couleur du lien lorsque la souris le survole */
+    .icon-linkintero:hover {
+        color: green; /* Couleur au survol */
+    }
+    </style>
+</head>
+<body>
+
+ <div class="icon-intero">
+        <a href="MENU.html" class="icon-linkintero">
+            <span class="icon">?</span>
+        </a>
+    </div>
+
+<div class="container">    
+    <div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir en .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir en .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir en .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser en parties</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever des pages</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner des .pdf</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+	<div style="margin-top: 200px;">
+	<P>Séléctionnez plusieurs fichiers .pdf afin de pouvoir recompiler un PDF assemblé.</P>
+
+    <input type="file" id="pdf-upload" accept="application/pdf" multiple />
+    <button id="combine-pdf">Combiner les PDFs</button>
+    <div id="pdf-previews"></div>
+
+    <!-- Charger pdfjs-dist pour afficher les pages PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <!-- Charger pdf-lib pour manipuler les PDF -->
+    <script src="https://unpkg.com/pdf-lib"></script>
+
+    <script>
+        const pdfUpload = document.getElementById('pdf-upload');
+        const combinePdfButton = document.getElementById('combine-pdf');
+        const pdfPreviews = document.getElementById('pdf-previews');
+
+        let loadedPdfs = [];
+
+        // Fonction pour afficher les aperçus des fichiers PDF dans l'ordre correct
+        pdfUpload.addEventListener('change', async function(event) {
+            const files = Array.from(event.target.files); // Convertir en tableau pour garder l'ordre
+            pdfPreviews.innerHTML = ''; // Réinitialiser les aperçus précédents
+            loadedPdfs = [];
+
+            for (const file of files) {
+                const fileReader = new FileReader();
+                fileReader.onload = async function(e) {
+                    const pdfData = new Uint8Array(e.target.result);
+                    const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                    const pdfDoc = await loadingTask.promise;
+
+                    // Stocker les fichiers chargés dans l'ordre de sélection
+                    loadedPdfs.push({
+                        name: file.name,
+                        data: pdfData,
+                        pdfDoc: pdfDoc
+                    });
+
+                    // Afficher l'aperçu de la première page du PDF
+                    const page = await pdfDoc.getPage(1);
+                    const viewport = page.getViewport({ scale: 0.95 }); // ************* Échelle de réduction des aperçus **************
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    await page.render(renderContext).promise;
+
+                    const div = document.createElement('div');
+                    div.classList.add('pdf-preview');
+
+                    const label = document.createElement('div');
+                    label.classList.add('pdf-preview-label');
+                    label.textContent = file.name;
+
+                    div.appendChild(canvas);
+                    div.appendChild(label);
+
+                    // Ajouter l'aperçu en premier (ordre inversé)
+                    pdfPreviews.prepend(div);
+                };
+
+                fileReader.readAsArrayBuffer(file);
+            }
+        });
+
+        // Combiner les fichiers PDF en un seul dans l'ordre correct
+        combinePdfButton.addEventListener('click', async function() {
+            if (loadedPdfs.length === 0) {
+                alert("Veuillez d'abord sélectionner des fichiers PDF.");
+                return;
+            }
+
+            const newPdf = await PDFLib.PDFDocument.create();
+
+            // Ajouter chaque PDF dans l'ordre de sélection (pas inversé)
+            for (const loadedPdf of loadedPdfs) {
+                const originalPdf = await PDFLib.PDFDocument.load(loadedPdf.data);
+                const copiedPages = await newPdf.copyPages(originalPdf, originalPdf.getPageIndices());
+                copiedPages.forEach((page) => newPdf.addPage(page));
+            }
+
+            const newPdfBytes = await newPdf.save();
+            const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Documents_combinés.pdf`;
+            link.click();
+        });
+    </script>
+
+</body>
+</html>
+
+

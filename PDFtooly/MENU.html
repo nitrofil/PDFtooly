@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>GESTION PDF</title>
+<meta name="description" content="Le menu change d'apparence en fonction de la taille de la fenetre du navigateur, idéal donc pour les smartphones et tablettes" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+
+	<style>
+	/* Changer la couleur du lien lorsque la souris le survole */
+    .icon-linklicens:hover {
+        color: green; /* Couleur au survol */
+    }
+	</style>
+</head>
+<body>
+<div class="container">	
+	<div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir en .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir en .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir en .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser en parties</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever des pages</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner des .pdf</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+		
+	<div style="margin-top: 200px;">
+	<P>- PDFtooly : divers outils pour faciliter la gestion des fichiers PDF.</P>
+	<br>
+		<P>- Suivant l'option choisie, maintenir CTRL pour séléctionner plusieurs fichiers.</P>
+		<P>- Tous les fichiers modifiés, convertis, divisés ou autres, se trouvent dans le dossier "Téléchargement".</P>
+		<br>
+			<P>- Une connexion internet est requise pour charger les librairies d'usages :</P>
+				<P>jspdf.umd.min.js, pdf-lib, jszip.min.js, pdf.min.js, FileSaver.min.js, jszip.min.js, pdf.worker.min.js, pdfjs-dist.</P>
+				<br>
+					<P>- Tous les fichiers sont traités localement, rien n'est envoyer en dehors de l'ordinateur.</P>
+					<br>
+						<P>Menu par Codrops ; Traitements des PDF/JPG/ZIP par Nitrofil - 2024</P><br>
+						<a href="https://spdx.org/licenses/MIT" class="icon-linklicens" target="_blank">Produit sous licence MIT.&nbsp;</a>
+	</div>
+</div><!-- /container -->
+<script>
+	//  Changement de class
+	var changeClass = function (r,className1,className2) {
+		var regex = new RegExp("(?:^|\\s+)" + className1 + "(?:\\s+|$)");
+		if( regex.test(r.className) ) {
+			r.className = r.className.replace(regex,' '+className2+' ');
+	    }
+	    else{
+			r.className = r.className.replace(new RegExp("(?:^|\\s+)" + className2 + "(?:\\s+|$)"),' '+className1+' ');
+	    }
+	    return r.className;
+	};	
+	//  Creation du bouton pour écran plus petit
+	var menuElements = document.getElementById('menu');
+	menuElements.insertAdjacentHTML('afterBegin','<button type="button" id="menutoggle" class="navtoogle" aria-hidden="true"><i aria-hidden="true" class="icon-menu"> </i> Menu</button>');
+	//  Affichage / fermeture du menu
+	document.getElementById('menutoggle').onclick = function() {
+	changeClass(this, 'navtoogle active', 'navtoogle');
+		}
+	// http://tympanus.net/codrops/2013/05/08/responsive-retina-ready-menu/comment-page-2/#comment-438918
+	document.onclick = function(e) {
+		var mobileButton = document.getElementById('menutoggle'),
+			buttonStyle =  mobileButton.currentStyle ? mobileButton.currentStyle.display : getComputedStyle(mobileButton, null).display;
+			if(buttonStyle === 'block' && e.target !== mobileButton && new RegExp(' ' + 'active' + ' ').test(' ' + mobileButton.className + ' ')) {
+			changeClass(mobileButton, 'navtoogle active', 'navtoogle');
+		}
+	}
+</script>
+</body>
+</html>
