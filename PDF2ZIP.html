@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html; utf-8" />
+<title>CONVERTIR EN ZIP</title>
+<meta name="description" content="Conversion de 1 ou plusieus .PDF en fichier .ZIP - Maintenir CTRL" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+
+<style>
+    /* Style pour l'aperçu des fichiers PDF */
+    #pdf-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;  Espace de 10px entre chaque image (ici canvas converti en image) */
+		/*align-items: flex-start;  Aligne les miniatures au sommet */
+		/*flex-shrink: 0;  Empêche le redimensionnement */
+		object-fit: contain; /* Assure le ratio sans débordement */
+    }
+
+    /* Style pour chaque image dans l'aperçu */
+    #pdf-preview img {
+        width: 100%;        /* L'image prend la largeur du conteneur */
+        height: auto;       /* Ajuste la hauteur pour maintenir le ratio */
+        max-width: 360px;   /* Limite la largeur maximale à 360px */
+        border: 1px solid #ccc; /* Bordure légère autour de l'image */
+        margin-top: 0px;    /* Décale l'aperçu de 10px vers le bas */
+        margin-left: 0px;    /* Aucune marge à gauche de l'image */
+        box-sizing: border-box; /* Inclure la bordure dans le calcul de la taille totale */
+        border-radius: 8px;  /* Coins arrondis */
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4); /* Ombre légère sous l'image */
+        position: relative;  /* Nécessaire pour appliquer le décalage */
+        left: 0px;          /* Décale l'aperçu légèrement à gauche si nécessaire */
+        top: 20px;           /* Décale l'aperçu légèrement vers le haut */
+		object-fit: contain; /* Assure le ratio sans débordement */
+    }
+
+    .icon-intero {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+    }
+
+    .icon-linkintero {
+        text-decoration: none;
+        color: black;
+        font-size: 24px;
+    }
+
+    /* Changer la couleur du lien lorsque la souris le survole */
+    .icon-linkintero:hover {
+        color: green; /* Couleur au survol */
+    }
+	
+    /* Style du spinner */
+    #loading-spinner {
+        display: none;
+        width: 70px;
+        height: 70px;
+        border: 7px solid #AAAAAA;
+        border-top: 7px solid rgb(22, 145, 190);
+        border-radius: 70%;
+        animation: spin 1.5s linear infinite;
+        position: fixed;  /* Positionner par rapport à la fenêtre */
+        top: 50%;  /* Centrer verticalement */
+        left: 46.16%;  /* Centrer horizontalement */
+        transform: translate(-50%, -50%);  /* Ajuster pour un centrage parfait */
+        z-index: 9999;  /* Placer le spinner au-dessus des autres éléments */
+        text-align: center;
+    }
+
+    /* Animation du spinner */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Désactiver les interactions */
+    body.loading {
+        pointer-events: none; /* Désactiver les interactions pendant le chargement */
+    }
+	
+	#loading-text {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-size: 12px;
+		color: rgb(22, 145, 190); /* Même couleur que la bordure supérieure */
+		font-weight: bold;
+		text-transform: uppercase;
+	}
+	
+	/* Masquer les éléments par défaut */
+    .hidden {
+        display: none;
+    }
+</style>
+
+</head>
+<body>
+
+ <div class="icon-intero">
+        <a href="MENU.html" class="icon-linkintero">
+            <span class="icon">?</span>
+        </a>
+    </div>
+
+<div class="container">    
+    <div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFROTATE.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Rotation</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFMELANG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Organiser</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFFILIGRAN.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Filigrane</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+	<div style="margin-top: 150px;">
+	<P>Séléctionnez un ou plusieurs fichier(s) .pdf afin de créer une archive au format ZIP,&nbsp;  (affiche un aperçu de la première page de chaque fichier).</P>
+    <div id="controls" style="display: flex; align-items: center; gap: 10px;">
+	<input type="file" id="pdf-upload" accept="application/pdf" multiple/>
+        <input type="text" id="zip-name" class="hidden" placeholder="Nom du fichier de sortie"/><!-- Ajouter un champ de texte pour le nom du fichier ZIP -->
+    <button id="generate-zip" class="hidden">Générer ZIP</button><label for="three-per-row-checkbox" id="label-checkbox" class="hidden">&emsp;Réduire :</label><input type="checkbox" id="three-per-row-checkbox" class="hidden">&nbsp;
+			    <div id="loading-spinner"><span id="loading-text">Chargement</span></div><!-- Spinner de chargement -->
+    </div>
+	<div id="pdf-preview"></div>
+
+    <!-- Charger les bibliothèques nécessaires -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+<script>
+    // Configurer le chemin du worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
+    const pdfUpload = document.getElementById('pdf-upload');
+    const pdfPreview = document.getElementById('pdf-preview');
+    const generateZipButton = document.getElementById('generate-zip');
+    const zipNameInput = document.getElementById('zip-name'); // Champ pour le nom du fichier ZIP
+    const pdfFiles = []; // Stocker les fichiers PDF chargés
+	const loadingSpinner = document.getElementById('loading-spinner');
+
+    // Prévisualiser les fichiers PDF et les stocker
+	pdfUpload.addEventListener('change', function(event) {
+    pdfPreview.innerHTML = ''; // Vider la prévisualisation
+    pdfFiles.length = 0; // Réinitialiser les fichiers PDF stockés
+
+    const files = event.target.files;
+
+    // Afficher le spinner et désactiver les interactions pendant le traitement
+    document.body.classList.add('loading');
+	threePerRowCheckbox.checked = false;// Ajout de la classe "loading" pour désactiver les interactions
+    loadingSpinner.style.display = 'block';
+
+    let loadedCount = 0; // Compteur pour les fichiers chargés
+    const totalFiles = files.length; // Nombre total de fichiers PDF
+
+    const promises = []; // Tableau pour stocker les promesses
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        pdfFiles.push(file); // Ajouter le fichier PDF à la liste
+
+        // Ajouter une promesse pour chaque fichier PDF chargé
+        const previewPromise = new Promise((resolve) => {
+            displayPDFPreview(file, resolve); // Passer la fonction de callback qui résoud la promesse
+        });
+
+        promises.push(previewPromise); // Ajouter la promesse au tableau
+    }
+
+    // Attendre que toutes les promesses soient résolues avant de masquer le spinner
+    Promise.all(promises).then(() => {
+        loadingSpinner.style.display = 'none'; // Masquer le spinner
+		
+	document.getElementById('zip-name').style.display = 'block';		
+	document.getElementById('generate-zip').style.display = 'block';	
+	document.getElementById('label-checkbox').style.display = 'block';		
+	document.getElementById('three-per-row-checkbox').style.display = 'block';
+	
+        document.body.classList.remove('loading'); // Réactiver les interactions
+    }).catch((error) => {
+        console.error("Erreur lors du rendu des miniatures:", error);
+        loadingSpinner.style.display = 'none'; // Masquer le spinner même en cas d'erreur
+		
+	document.getElementById('zip-name').style.display = 'block';		
+	document.getElementById('generate-zip').style.display = 'block';	
+	document.getElementById('label-checkbox').style.display = 'block';		
+	document.getElementById('three-per-row-checkbox').style.display = 'block';
+	
+        document.body.classList.remove('loading'); // Réactiver les interactions
+    });
+});
+
+	// Afficher un aperçu de la première page du PDF
+	function displayPDFPreview(file, callback) {
+    const fileReader = new FileReader();
+
+    fileReader.onload = function() {
+        const typedArray = new Uint8Array(this.result);
+
+        pdfjsLib.getDocument(typedArray).promise.then(function(pdf) {
+            pdf.getPage(1).then(function(page) {
+                const scale = 3.0; // Facteur d'échelle pour la qualité de l'aperçu
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                page.render(renderContext).promise.then(function() {
+                    // Convertir la page en image
+                    const img = document.createElement('img');
+                    img.src = canvas.toDataURL('image/jpeg');
+                    pdfPreview.appendChild(img);
+
+                    // Appeler le callback pour signaler que le fichier est chargé
+                    callback();
+                }).catch(function(error) {
+                    console.error("Erreur lors du rendu de la page:", error);
+                    callback(); // Toujours appeler le callback même en cas d'erreur
+                });
+            }).catch(function(error) {
+                console.error("Erreur lors de la récupération de la page:", error);
+                callback(); // Toujours appeler le callback même en cas d'erreur
+            });
+        }).catch(function(error) {
+            console.error("Erreur lors du chargement du PDF:", error);
+            callback(); // Toujours appeler le callback même en cas d'erreur
+        });
+    };
+
+    fileReader.readAsArrayBuffer(file);
+}
+
+ // Générer le ZIP à partir des fichiers PDF chargés
+generateZipButton.addEventListener('click', function() {
+    if (pdfFiles.length === 0) {
+        alert("Veuillez d'abord télécharger des fichiers PDF.");
+        return;
+    }
+
+    const zipFileName = zipNameInput.value.trim() || "pdf_compress.zip"; // Utiliser le nom entré, sinon valeur par défaut
+    const zip = new JSZip(); // Créer un fichier ZIP
+
+    const pdfPromises = pdfFiles.map((file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const fileName = file.name; // Nom du fichier PDF
+                const fileContent = e.target.result; // Contenu du fichier
+                zip.file(fileName, fileContent);  // Ajouter le fichier PDF au ZIP
+
+                resolve();  // Résoudre la promesse une fois le fichier ajouté
+            };
+
+            reader.onerror = function() {
+                reject(new Error('Erreur lors de la lecture du fichier'));
+            };
+
+            reader.readAsArrayBuffer(file);  // Lire le fichier PDF
+        });
+    });
+
+    // Une fois que tous les fichiers PDF sont ajoutés au ZIP, le générer et le télécharger
+    Promise.all(pdfPromises).then(() => {
+        zip.generateAsync({ type: 'blob' }).then(function(content) {
+            saveAs(content, zipFileName);  // Sauvegarder le fichier ZIP généré
+        }).catch(function(error) {
+            console.error("Erreur lors de la génération du ZIP:", error);
+            alert("Une erreur est survenue lors de la création du fichier ZIP.");
+        });
+    }).catch(function(error) {
+        console.error("Erreur lors du traitement des fichiers PDF:", error);
+        alert("Une erreur est survenue lors du traitement des fichiers PDF.");
+    });
+});
+
+	// Récupère l'élément checkbox
+    const threePerRowCheckbox = document.getElementById('three-per-row-checkbox');
+
+    // Fonction pour ajuster la largeur des miniatures en fonction de la case à cocher
+    function updatePreviewWidth() {
+        const maxWidth = threePerRowCheckbox.checked ? '268px' : '360px';  // Change la largeur en fonction de la case
+        const imageContainers = document.querySelectorAll('#pdf-preview img');
+        imageContainers.forEach(container => {
+            container.style.maxWidth = maxWidth;
+        });
+    }
+
+    // Lors du changement de la case à cocher, on met à jour la largeur
+    threePerRowCheckbox.addEventListener('change', updatePreviewWidth);
+
+    // Initialisation : on s'assure que la case est décochée au chargement de la page
+    window.addEventListener('load', function() {
+        threePerRowCheckbox.checked = false; // La case est décochée par défaut
+        document.getElementById('pdf-upload').value = "";// Réinitialiser l'entrée de fichier
+	document.getElementById('zip-name').style.display = 'none';		
+	document.getElementById('generate-zip').style.display = 'none';	
+	document.getElementById('label-checkbox').style.display = 'none';		
+	document.getElementById('three-per-row-checkbox').style.display = 'none';
+        updatePreviewWidth(); // Applique la largeur initiale
+    });
+</script>
+
+</body>
+</html>
+
+

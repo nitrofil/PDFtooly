@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>COMBINER DES PDF</title>
+<meta name="description" content="Recompiler un PDF assemblé" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+
+<style>
+    .pdf-preview {
+        margin: 5px;
+        display: inline-block;
+        position: relative;
+        text-align: center;
+        cursor: move;  /* Change le curseur pour indiquer que l'élément est déplaçable */
+    }
+
+    .pdf-preview canvas {
+        margin-bottom: -2px;
+        max-width: 360px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        transform: translate(-5px, 14px);
+    }
+
+    .pdf-preview-label {
+        font-weight: bold;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(0deg);
+        font-size: 18px;
+        color: black;
+        text-align: center;
+        background-color: white;
+        border: 2px solid #007bff;
+        border-radius: 5px;
+        padding: 5px 10px;
+        pointer-events: none;
+        z-index: 2;
+		
+    max-width: 95%; /* Ne pas dépasser la largeur du parent */
+    overflow: hidden; /* Cacher le texte qui déborde */
+    white-space: nowrap; /* Forcer le texte sur une seule ligne */
+    text-overflow: ellipsis; /* Ajouter des points de suspension */
+    text-align: center; /* Centrer le texte */
+    font-size: 12px; /* Ajuster la taille du texte */
+    padding: 5px; /* Espacement interne */
+	color: #000000; /* Couleur de la police (exemple : blanc) */
+    background-color: #eef6ff; /* Couleur de fond (exemple : bleu) */
+    box-sizing: border-box; /* Inclure les marges dans le calcul de la largeur */
+    margin-left: -5px; /* Décaler vers la gauche */
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+
+    }
+
+    .icon-intero {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+    }
+
+    .icon-linkintero {
+        text-decoration: none;
+        color: black;
+        font-size: 24px;
+    }
+
+    .icon-linkintero:hover {
+        color: green;
+    }
+
+    .drag-over {
+        border: 2px dashed #ccc; /* Style du bord lorsque l'élément est en survol */
+    }
+	
+    /* Style du spinner */
+    #loading-spinner {
+        display: none;
+        width: 70px;
+        height: 70px;
+        border: 7px solid #AAAAAA;
+        border-top: 7px solid rgb(21, 40, 54);
+        border-radius: 70%;
+        animation: spin 1.5s linear infinite;
+        position: fixed;  /* Positionner par rapport à la fenêtre */
+        top: 50%;  /* Centrer verticalement */
+        left: 46.16%;  /* Centrer horizontalement */
+        transform: translate(-50%, -50%);  /* Ajuster pour un centrage parfait */
+        z-index: 9999;  /* Placer le spinner au-dessus des autres éléments */
+		text-align: center;
+    }
+
+    /* Animation du spinner */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Désactiver les interactions */
+    body.loading {
+        pointer-events: none; /* Désactiver les interactions pendant le chargement */
+    }
+	
+	#loading-text {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-size: 12px;
+		color: rgb(21, 40, 54); /* Même couleur que la bordure supérieure */
+		font-weight: bold;
+		text-transform: uppercase;
+	}
+	
+	/* Masquer les éléments par défaut */
+    .hidden {
+        display: none;
+    }
+</style>
+
+</head>
+<body>
+
+    <div class="icon-intero">
+        <a href="MENU.html" class="icon-linkintero">
+            <span class="icon">?</span>
+        </a>
+    </div>
+
+<div class="container">    
+    <div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFROTATE.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Rotation</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFMELANG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Organiser</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFFILIGRAN.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Filigrane</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    <div style="margin-top: 150px;">
+    <p>Séléctionnez plusieurs fichiers .pdf afin de recompiler un PDF assemblé,&nbsp;  (affiche un aperçu de la première page de chaque fichier).</p>
+<div id="controls" style="display: flex; align-items: center; gap: 10px;">
+    <input type="file" id="pdf-upload" accept="application/pdf" multiple />
+    <button id="combine-pdf" class="hidden">Combiner les PDFs</button><label for="three-per-row-checkbox" id="label-checkbox" class="hidden">&emsp;Réduire :</label><input type="checkbox" id="three-per-row-checkbox" class="hidden">&nbsp;
+			    <div id="loading-spinner"><span id="loading-text">Chargement</span></div><!-- Spinner de chargement -->
+</div>			
+    <div id="pdf-previews"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib"></script>
+
+<script>
+    const pdfUpload = document.getElementById('pdf-upload');
+    const combinePdfButton = document.getElementById('combine-pdf');
+    const pdfPreviews = document.getElementById('pdf-previews');
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    let loadedPdfs = []; // Tableau pour stocker les fichiers PDF
+    let dragSrcEl = null; // Élément source du drag
+
+    pdfUpload.addEventListener('change', async function (event) {
+        const files = Array.from(event.target.files);
+        pdfPreviews.innerHTML = ''; // Réinitialiser les aperçus précédents
+        loadedPdfs = [];
+
+        // Afficher le spinner
+        loadingSpinner.style.display = 'block';		
+        document.body.classList.add('loading');
+
+        for (const file of files) {
+            try {
+                const pdfData = await readFileAsArrayBuffer(file);
+                const pdfDoc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+
+                loadedPdfs.push({
+                    name: file.name,
+                    data: pdfData,
+                    pdfDoc: pdfDoc
+                });
+
+                await renderPdfPreview(pdfDoc, file.name);
+            } catch (error) {
+                console.error(`Erreur lors du traitement du fichier ${file.name}:`, error);
+            }
+        }
+
+        // Masquer le spinner
+        loadingSpinner.style.display = 'none';
+		document.getElementById('combine-pdf').style.display = 'block';	
+		document.getElementById('label-checkbox').style.display = 'block';		
+		document.getElementById('three-per-row-checkbox').style.display = 'block';
+        document.body.classList.remove('loading');
+    });
+
+    function readFileAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(new Uint8Array(reader.result));
+            reader.onerror = () => reject(new Error(`Erreur de lecture du fichier: ${file.name}`));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    async function renderPdfPreview(pdfDoc, fileName) {
+        const page = await pdfDoc.getPage(1);
+        const viewport = page.getViewport({ scale: 1 });
+        const desiredWidth = 400;
+        const scale = desiredWidth / viewport.width;
+
+        threePerRowCheckbox.checked = false; // La case est décochée par défaut
+		
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const newViewport = page.getViewport({ scale });
+
+        canvas.width = newViewport.width;
+        canvas.height = newViewport.height;
+
+        const renderContext = {
+            canvasContext: context,
+            viewport: newViewport
+        };
+
+        await page.render(renderContext).promise;
+
+        const div = document.createElement('div');
+        div.classList.add('pdf-preview');
+        div.setAttribute('draggable', 'true');
+
+        const label = document.createElement('div');
+        label.classList.add('pdf-preview-label');
+        label.textContent = fileName;
+
+        div.appendChild(canvas);
+        div.appendChild(label);
+
+        pdfPreviews.appendChild(div);
+
+        addDragAndDropListeners(div);
+    }
+
+    function addDragAndDropListeners(element) {
+        element.addEventListener('dragstart', handleDragStart);
+        element.addEventListener('dragover', handleDragOver);
+        element.addEventListener('drop', handleDrop);
+        element.addEventListener('dragend', handleDragEnd);
+    }
+
+    function handleDragStart(e) {
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        this.style.opacity = '0.4';
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        if (dragSrcEl !== this) {
+            const children = Array.from(pdfPreviews.children);
+            const fromIndex = children.indexOf(dragSrcEl);
+            const toIndex = children.indexOf(this);
+
+            pdfPreviews.insertBefore(dragSrcEl, this);
+            loadedPdfs.splice(toIndex, 0, loadedPdfs.splice(fromIndex, 1)[0]);
+        }
+    }
+
+    function handleDragEnd() {
+        this.style.opacity = '1';
+        Array.from(pdfPreviews.children).forEach(el => el.classList.remove('drag-over'));
+    }
+
+    combinePdfButton.addEventListener('click', async function () {
+        if (loadedPdfs.length === 0) {
+            //alert('Veuillez sélectionner des fichiers PDF.');
+            return;
+        }
+
+        const newPdf = await PDFLib.PDFDocument.create();
+
+        for (const preview of Array.from(pdfPreviews.children)) {
+            const label = preview.querySelector('.pdf-preview-label').textContent;
+            const file = loadedPdfs.find(pdf => pdf.name === label);
+
+            const originalPdf = await PDFLib.PDFDocument.load(file.data);
+            const copiedPages = await newPdf.copyPages(originalPdf, originalPdf.getPageIndices());
+            copiedPages.forEach(page => newPdf.addPage(page));
+        }
+
+        const pdfBytes = await newPdf.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'Documents_combinés.pdf';
+        link.click();
+    });
+	
+	// Récupère l'élément checkbox
+    const threePerRowCheckbox = document.getElementById('three-per-row-checkbox');
+
+    // Fonction pour ajuster la largeur des miniatures en fonction de la case à cocher
+    function updatePreviewWidth() {
+        const maxWidth = threePerRowCheckbox.checked ? '268px' : '360px';  // Change la largeur en fonction de la case
+        const imageContainers = document.querySelectorAll('.pdf-preview canvas');
+        imageContainers.forEach(container => {
+            container.style.maxWidth = maxWidth;
+        });
+    }
+
+    // Lors du changement de la case à cocher, on met à jour la largeur
+    threePerRowCheckbox.addEventListener('change', updatePreviewWidth);
+
+    // Initialisation : on s'assure que la case est décochée au chargement de la page
+    window.addEventListener('load', function() {
+        threePerRowCheckbox.checked = false; // La case est décochée par défaut
+		document.getElementById('pdf-upload').value = "";// Réinitialiser l'entrée de fichier
+	document.getElementById('combine-pdf').style.display = 'none';	
+	document.getElementById('label-checkbox').style.display = 'none';		
+	document.getElementById('three-per-row-checkbox').style.display = 'none';
+        updatePreviewWidth(); // Applique la largeur initiale
+    });
+</script>
+		</div>
+    </div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

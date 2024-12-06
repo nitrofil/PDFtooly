@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html; utf-8" />
+<title>CONVERTIR EN PDF</title>
+<meta name="description" content="Conversion de 1 ou plusieus .jpg en fichier .pdf - Maintenir CTRL" />
+<meta name="Robots" content="all"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<link rel="stylesheet" type="text/css" href="css/component.css" />
+<script src="js/modernizr.custom.js"></script>
+
+<style>
+	#image-preview {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-top: 15px;
+	}
+
+	#image-preview img {
+		width: 100%;
+		height: auto;
+		max-width: 360px;
+		border: 1px solid #ccc;
+		margin-top: 5px;
+		box-sizing: border-box;
+		border-radius: 8px;
+		box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+		cursor: move;
+	}
+
+	#image-preview img.drag-over {
+		border: 2px dashed #ccc;
+	}
+
+	.icon-intero {
+		position: fixed;
+		top: 10px;
+		right: 10px;
+	}
+	.icon-linkintero {
+		text-decoration: none;
+		color: black;
+		font-size: 24px;
+	}
+	.icon-linkintero:hover {
+		color: green;
+	}
+
+	/* Style du spinner */
+	#loading-spinner {
+		display: none;
+		width: 70px;
+		height: 70px;
+		border: 7px solid #AAAAAA;
+		border-top: 7px solid rgb(233, 147, 26);
+		border-radius: 70%;
+		animation: spin 1.5s linear infinite;
+		position: fixed;  /* Positionner par rapport à la fenêtre */
+		top: 50%;  /* Centrer verticalement */
+		left: 46.16%;  /* Centrer horizontalement */
+		transform: translate(-50%, -50%);  /* Ajuster pour un centrage parfait */
+		z-index: 9999;  /* Placer le spinner au-dessus des autres éléments */
+		text-align: center;
+	}
+
+    /* Animation du spinner */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+	/* Désactiver les interactions */
+		body.loading {
+		pointer-events: none; /* Désactiver les interactions pendant le chargement */
+	}
+	
+	#loading-text {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-size: 12px;
+		color: rgb(233, 147, 26); /* Même couleur que la bordure supérieure */
+		font-weight: bold;
+		text-transform: uppercase;
+	}
+	
+	/* Masquer les éléments par défaut */
+    .hidden {
+        display: none;
+    }
+</style>
+
+</head>
+<body>
+
+ <div class="icon-intero">
+        <a href="MENU.html" class="icon-linkintero">
+            <span class="icon">?</span>
+        </a>
+    </div>
+
+<div class="container">    
+    <div class="main clearfix">
+        <nav id="menu" class="nav">                    
+            <ul>
+                <li>
+                    <a href="PDF2JPG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-home"></i>
+                        </span>
+                        <span>Convertir .jpg</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="JPG-PNG2PDF.html">
+                        <span class="icon"> 
+                            <i aria-hidden="true" class="icon-services"></i>
+                        </span>
+                        <span>Convertir .pdf</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDF2ZIP.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-portfolio"></i>
+                        </span>
+                        <span>Convertir .zip</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="PDFDIVISION.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Diviser</span>
+                    </a>
+                </li>
+                <li>
+					<a href="PDFSUPPR.html">
+						<span class="icon">
+							<i aria-hidden="true" class="icon-team"></i>
+						</span>
+						<span>Enlever</span>
+					</a>
+                </li>
+                <li>
+                    <a href="PDFCOLL.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-contact"></i>
+                        </span>
+                        <span>Combiner</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFROTATE.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Rotation</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFMELANG.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Organiser</span>
+                    </a>
+                </li>
+				<li>
+                    <a href="PDFFILIGRAN.html">
+                        <span class="icon">
+                            <i aria-hidden="true" class="icon-blog"></i>
+                        </span>
+                        <span>Filigrane</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+	<div style="margin-top: 150px;">
+	<p>Sélectionnez un ou plusieurs fichiers image .jpg ou .png afin de les convertirs en PDF au format A4 Portrait (une image par page).</p>
+	<div id="controls" style="display: flex; align-items: center; gap: 10px;">
+    <input type="file" id="image-upload" accept="image/jpeg, image/png" multiple/>
+    <input type="text" id="pdf-name" class="hidden"placeholder="Nom du fichier de sortie"/>
+    <button id="generate-pdf" class="hidden">Générer PDF</button>
+	<label for="orientation" id="label-orientation" class="hidden">&emsp;A4 Paysage.</label><input type="checkbox" id="orientation" name="orientation" class="hidden"></input><label for="three-per-row-checkbox" id="label-checkbox" class="hidden">&emsp;Réduire :</label><input type="checkbox" id="three-per-row-checkbox" class="hidden" />
+	<div id="loading-spinner"><span id="loading-text">Chargement</span></div><!-- Spinner de chargement -->
+    </div>
+	<div id="image-preview"></div>
+</div>
+
+<!-- Charger jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+
+// Assurez-vous que les cases sont décochées à chaque actualisation de la page
+window.addEventListener('load', function() {
+    const orientationCheckbox = document.getElementById('orientation');
+	document.getElementById('image-upload').value = "";// Réinitialiser l'entrée de fichier
+	document.getElementById('pdf-name').value = "";// Réinitialiser l'export de fichier
+    orientationCheckbox.checked = false;  // Décoche la case "orientation"
+	threePerRowCheckbox.checked = false;  // Décoche la case "réduire"
+	
+	document.getElementById('pdf-name').style.display = 'none';	
+	document.getElementById('generate-pdf').style.display = 'none';	
+	document.getElementById('label-checkbox').style.display = 'none';
+	document.getElementById('three-per-row-checkbox').style.display = 'none';
+	document.getElementById('label-orientation').style.display = 'none'
+	document.getElementById('orientation').style.display = 'none';
+	
+	updatePreviewWidth();  // Applique la largeur des miniatures selon l'état de la case (maintenant décochée)
+});
+
+	const imageUpload = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const generatePDFButton = document.getElementById('generate-pdf');
+    const pdfNameInput = document.getElementById('pdf-name');
+	const loadingSpinner = document.getElementById('loading-spinner');
+
+    let images = []; // Stocker les images chargées
+    let imgElements = []; // Stocker les éléments d'images HTML pour l'ordre des miniatures
+
+    // Prévisualiser les images et les stocker
+    imageUpload.addEventListener('change', function(event) {
+        imagePreview.innerHTML = ''; // Vider la prévisualisation
+			threePerRowCheckbox.checked = false;// Ajout de la classe "loading" pour désactiver les interactions
+        images = []; // Réinitialiser les images stockées
+        imgElements = []; // Réinitialiser les éléments HTML des images
+		
+		let loadedCount = 0; // Compteur pour les fichiers chargés
+        const files = event.target.files;
+		const totalFiles = files.length; // Nombre total de fichiers à charger pour le spinner
+		
+	// Afficher le spinner et désactiver les interactions 
+	if (totalFiles > 0) {
+		loadingSpinner.style.display = 'block';
+			document.getElementById('pdf-name').style.display = 'block';	
+	document.getElementById('generate-pdf').style.display = 'block';	
+	document.getElementById('label-checkbox').style.display = 'block';
+	document.getElementById('three-per-row-checkbox').style.display = 'block';
+	document.getElementById('label-orientation').style.display = 'block'
+	document.getElementById('orientation').style.display = 'block';
+		
+				document.body.classList.add('loading');
+	} else {
+		alert("Aucun fichier sélectionné.");
+		return;
+	}
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            
+            // Ajouter des événements drag-and-drop
+            img.setAttribute('draggable', 'true');
+            img.addEventListener('dragstart', handleDragStart);
+            img.addEventListener('dragover', handleDragOver);
+            img.addEventListener('drop', handleDrop);
+            img.addEventListener('dragend', handleDragEnd);
+            
+            imagePreview.appendChild(img);
+
+            // Stocker l'image en base64 et l'élément HTML de l'image pour pouvoir réorganiser
+            images.push(e.target.result);
+            imgElements.push(img);
+			
+			 loadedCount++;
+
+        // Vérifier si toutes les images sont chargées
+        if (loadedCount === totalFiles) {
+            loadingSpinner.style.display = 'none'; // Masquer le spinner
+            document.body.classList.remove('loading'); // Réactiver les interactions
+        }
+    };
+
+    <!-- reader.onerror = function() { -->
+        <!-- console.error(`Erreur lors du chargement du fichier : ${file.name}`); -->
+        <!-- loadedCount++; -->
+
+        <!-- // Toujours vérifier si tout est chargé, même en cas d'erreur -->
+        <!-- if (loadedCount === totalFiles) { -->
+            <!-- loadingSpinner.style.display = 'none'; -->
+            <!-- document.body.classList.remove('loading'); -->
+        <!-- } -->
+    <!-- }; -->
+		
+		reader.onerror = function () {
+    console.error(`Erreur lors du chargement du fichier : ${file.name}`);
+    loadedCount++;
+    if (loadedCount === totalFiles) {
+        loadingSpinner.style.display = 'none';
+        document.body.classList.remove('loading');
+    }
+};
+
+        reader.readAsDataURL(file);
+    }
+});
+
+    // Gestion du drag-and-drop
+    let dragSrcEl = null;
+
+    function handleDragStart(e) {
+        dragSrcEl = this;
+        this.style.opacity = '0.4';
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        
+        if (dragSrcEl !== this) {
+            const allImages = Array.from(imagePreview.children);
+            const fromIndex = allImages.indexOf(dragSrcEl);
+            const toIndex = allImages.indexOf(this);
+            
+            // Réorganiser les images dans le DOM et dans le tableau
+            imagePreview.insertBefore(dragSrcEl, this);
+            images.splice(toIndex, 0, images.splice(fromIndex, 1)[0]);
+            imgElements.splice(toIndex, 0, imgElements.splice(fromIndex, 1)[0]);
+        }
+    }
+
+    function handleDragEnd(e) {
+        this.style.opacity = '1';
+        const allImages = document.querySelectorAll('#image-preview img');
+        allImages.forEach(img => img.classList.remove('drag-over'));
+    }
+	
+	 const threePerRowCheckbox = document.getElementById('three-per-row-checkbox');
+   
+        // Fonction pour ajuster la taille des images en fonction de l'état de la case
+        threePerRowCheckbox.addEventListener('change', function() {
+            const images = document.querySelectorAll('#image-preview img');
+            images.forEach(img => {
+                img.style.maxWidth = this.checked ? '268px' : '360px';
+            });
+        });
+
+	// Générer le PDF à partir des images chargées
+	generatePDFButton.addEventListener('click', function() {
+    const pdfName = pdfNameInput.value.trim();
+    const orientationCheckbox = document.getElementById('orientation');
+    const isLandscape = orientationCheckbox.checked; // Vérifier si "Paysage" est sélectionné
+
+    if (images.length === 0) {
+        alert("Veuillez d'abord télécharger des images.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+        orientation: isLandscape ? 'landscape' : 'portrait', // Choisir l'orientation
+    });
+
+    function addImageToPDF(imageData, index) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = imageData;
+
+            img.onload = function() {
+                const imgWidth = img.width;
+                const imgHeight = img.height;
+
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                let newWidth = imgWidth;
+                let newHeight = imgHeight;
+
+                if (imgWidth > pdfWidth || imgHeight > pdfHeight) {
+                    const widthRatio = pdfWidth / imgWidth;
+                    const heightRatio = pdfHeight / imgHeight;
+                    const bestRatio = Math.min(widthRatio, heightRatio);
+
+                    newWidth = imgWidth * bestRatio;
+                    newHeight = imgHeight * bestRatio;
+                }
+
+                if (index > 0) {
+                    pdf.addPage();
+                }
+
+                const xOffset = (pdfWidth - newWidth) / 2;
+                const yOffset = (pdfHeight - newHeight) / 2;
+
+                pdf.addImage(imageData, 'JPEG', xOffset, yOffset, newWidth, newHeight);
+
+                resolve();
+            };
+            img.onerror = reject;
+        });
+    }
+
+    const imagePromises = images.map((imageData, index) => addImageToPDF(imageData, index));
+
+    Promise.all(imagePromises)
+        .then(() => {
+            pdf.save(`${pdfName}.pdf`);
+        })
+        .catch(err => {
+            console.error("Erreur lors de l'ajout des images au PDF : ", err);
+        });
+});
+</script>
+
+</body>
+</html>
+
+
+
+
